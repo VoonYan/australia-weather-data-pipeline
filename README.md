@@ -16,8 +16,7 @@ The pipeline follows a classic extract, transform, load pattern:
 
 ## Daily automation
 
-`.github/workflows/daily.yml` runs the pipeline every day at 19:30 UTC, which is early morning in Australia after the archive API has updated. It commits the refreshed CSV and dashboard back to the repo. You can also trigger it manually from the Actions tab. The Streamlit app picks up each new commit automatically.
-
+`.github/workflows/daily.yml` runs the pipeline every day at 19:30 UTC, which is early morning in Australia after the archive API has updated. It commits the refreshed CSV and dashboard back to the repo.
 ## Data
 
 | Column | Meaning |
