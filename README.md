@@ -2,6 +2,7 @@
 
 A complete data engineering project that collects daily weather for the eight Australian capital cities, stores it as tidy data, builds a DuckDB warehouse with analytics views, and serves an interactive Streamlit dashboard. The data refreshes itself every day through GitHub Actions.
 
+**[Live Dashboard](https://australia-weather-data-pipeline-ujw4fsdhagwhnqqr5uif7d.streamlit.app/)**
 ## How it works
 
 The pipeline follows a classic extract, transform, load pattern:
