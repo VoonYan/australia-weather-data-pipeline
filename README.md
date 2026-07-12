@@ -1,8 +1,6 @@
 # Australia Weather Data Pipeline
 
-A small but complete data engineering project that collects daily weather for the eight Australian capital cities, stores it as tidy data, builds a DuckDB warehouse with analytics views, and publishes an interactive dashboard. The whole thing refreshes itself every day through GitHub Actions.
-
-Live dashboard: once GitHub Pages is enabled, your dashboard will be at `https://<your username>.github.io/<repo name>/`
+A complete data engineering project that collects daily weather for the eight Australian capital cities, stores it as tidy data, builds a DuckDB warehouse with analytics views, and serves an interactive Streamlit dashboard. The data refreshes itself every day through GitHub Actions.
 
 ## How it works
 
@@ -12,13 +10,13 @@ The pipeline follows a classic extract, transform, load pattern:
 
 2. **Transform and load** (`transform_load.py`). Flattens the raw JSON into tidy rows, then upserts them into `data/weather_daily.csv`, which is the source of truth committed to git. When history and forecast overlap for the same city and date, history wins. The script then rebuilds the DuckDB warehouse (`data/weather.duckdb`) with a fact table, a city dimension, and two mart views: `mart_monthly` and `mart_city_summary`.
 
-3. **Dashboard** (`build_dashboard.py`). Queries the warehouse and renders a single self contained `dashboard.html` with temperature trends, monthly rainfall, a seven day forecast and a city summary table. No server needed, just open it in a browser.
+3. **Serve**. Two options come built in. `build_dashboard.py` renders a self contained `dashboard.html` you can open in any browser. `streamlit_app.py` is an interactive Streamlit app that reads the committed CSV, so it always shows the latest data.
 
-`pipeline.py` runs all three steps in order.
+`pipeline.py` runs the extract, transform, load and dashboard steps in order.
 
 ## Daily automation
 
-`.github/workflows/daily.yml` runs the pipeline every day at 19:30 UTC, which is early morning in Australia after the archive API has updated. It commits the refreshed CSV and dashboard back to the repo, then deploys the dashboard to GitHub Pages. You can also trigger it manually from the Actions tab thanks to `workflow_dispatch`.
+`.github/workflows/daily.yml` runs the pipeline every day at 19:30 UTC, which is early morning in Australia after the archive API has updated. It commits the refreshed CSV and dashboard back to the repo. You can also trigger it manually from the Actions tab. The Streamlit app picks up each new commit automatically.
 
 ## Data
 
@@ -40,31 +38,16 @@ The committed CSV starts with a full year of history, about 3,000 rows, and grow
 pip install -r requirements.txt
 python pipeline.py            # full run: fetch, transform, load, dashboard
 python pipeline.py --no-fetch # rebuild warehouse and dashboard from the CSV
+streamlit run streamlit_app.py
 ```
 
-Then open `dashboard.html` in your browser, or query the warehouse directly:
+You can also query the warehouse directly:
 
 ```python
 import duckdb
 con = duckdb.connect("data/weather.duckdb")
 con.sql("SELECT * FROM mart_city_summary ORDER BY avg_temp DESC").show()
 ```
-
-## Publish on GitHub
-
-```bash
-git init
-git add .
-git commit -m "Initial commit: weather data pipeline"
-git branch -M main
-git remote add origin https://github.com/<your username>/<repo name>.git
-git push -u origin main
-```
-
-Then two small settings on github.com:
-
-1. In your repo go to Settings, then Pages, and set the source to **GitHub Actions**.
-2. Go to the Actions tab and enable workflows if prompted. You can start the first run right away with the "Run workflow" button on the Daily weather pipeline.
 
 ## Ideas to extend it
 
